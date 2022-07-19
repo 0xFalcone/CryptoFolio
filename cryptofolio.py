@@ -7,29 +7,9 @@ from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 from pyfiglet import Figlet
 import csv
-import re
 from tabulate import tabulate
 from pycoingecko import CoinGeckoAPI
 cg = CoinGeckoAPI()
-
-
-class Crypto:
-    def __init__(self, symbol="", name="", coins=0, price=0):
-        self.symbol = symbol
-        self.name = name
-        self.coins = coins
-        self.price = price
-        self.change24 = 0
-        self.change7 = 0
-        self.change30 = 0
-        self.value = self.coins * self.price
-
-    def __add__(self, other):
-        coins = self.coins + other.coins
-        return Crypto("tot", "Total", coins, 0)
-
-    def __str__(self):
-        return f"{self.symbol}: {self.coins} coins | ${self.price:,.2f} | {self.change24:.2f}% | {self.change7:.2f}% | ${self.value:,.2f}"
 
 
 def main():
@@ -80,7 +60,7 @@ def load_port():
         with open("portfolio.csv", "r", newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                port[row["symbol"]] = {"symbol": row["symbol"], "amount": row["amount"]}
+                port[row["symbol"]] = {"symbol": row["symbol"], "amount": float(row["amount"])}
     
     except FileNotFoundError:
         print("Welcome to CryptoFolio! Let's set up a new portfolio for you")
@@ -230,8 +210,9 @@ def sort_cmc(dump, port):
         change7 = dump["data"][coin]["quote"]["USD"]["percent_change_7d"] 
         port[coin]["change7"] = change7
         amount = port[coin]["amount"]
+        port[coin]["amount"] = amount
         value = float(price) * float(amount)
-        port[coin]["value"] = value
+        port[coin]["value"] = float(value)
     return port
     
 def api_eth_gas():
@@ -250,39 +231,25 @@ def display(port):
     crypto = list(port.keys())
     coin_display = []
     for coin in crypto:
+        name = f"{port[coin]['name']}"
+        price = f'${port[coin]["price"]:,.2f}'
+        change24 = f'{port[coin]["change24"]:.2f}%'
+        change7 = f'{port[coin]["change7"]:.2f}%'
+        amount = float(port[coin]["amount"])
+        value = f'${port[coin]["value"]:,.2f}'
         coin_display.append(
             {
-                "Coin": port[coin]["name"],
-                "Price": port[coin]["price"],
-                "24hr Change": port[coin]["change24"],
+                "Coin": name,
+                "Price": price, 
+                "24hr Change": change24, 
+                "7 Day Change": change7,
+                "Amount": amount, 
+                "Value": value, 
+
             })
-    print(coin_display)
 
     print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
 
-
-def display_table(tkn):
-    """Display token attributes in a table"""
-
-    tkn_list = []
-    for i in range(len(tkn)):
-        tkn_list.append(
-            {
-                "Token": tkn[i].name,
-                "Price": f"${tkn[i].price:,.2f}",
-                "24hr Change": f"{tkn[i].change24:.2f}%",
-                "7 Day Change": f"{tkn[i].change7:.2f}%",
-                "Coins": f"{tkn[i].coins}",
-                "Value": f"${tkn[i].value:,.2f}",
-            }
-        )
-    print(tabulate(tkn_list, headers="keys", tablefmt="grid", numalign="decimal"))
-    
-def total_value(tkn):
-    total = 0
-    for i in range(len(tkn)):
-        total += tkn[i].value
-    print(f"Total Portfolio: ${total:,.2f}")
 
 
 if __name__ == "__main__":
