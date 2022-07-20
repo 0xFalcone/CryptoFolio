@@ -23,11 +23,20 @@ def main():
         portfolio = add_buy(portfolio)
     elif command() == "sell":
         portfolio = add_sell(portfolio)
-    # elif command() == "news":
-    #     print(latest_news())
 
+    print(title())
     portfolio = update(portfolio)
     display(portfolio)
+
+    if command() == "news":
+        print(latest_news())
+
+
+def update(port):
+    port_sym = (list(port.keys()))
+    data = api_cmc(port_sym)
+    quote = sort_cmc(data, port)
+    return(quote)
 
 
 def command():
@@ -44,6 +53,7 @@ def command():
     elif args.n:
         return "news"
 
+
 def new_user():
     """ Checks for a saved portfolio.csv file """
     try:
@@ -51,6 +61,7 @@ def new_user():
             reader = csv.DictReader(file)
     except FileNotFoundError:
         return True
+
 
 def load_port():
     """ reads saved portfolio.csv or sets up new one and creates dict object"""
@@ -61,11 +72,10 @@ def load_port():
             reader = csv.DictReader(file)
             for row in reader:
                 port[row["symbol"]] = {"symbol": row["symbol"], "amount": float(row["amount"])}
-    
     except FileNotFoundError:
         print("Welcome to CryptoFolio! Let's set up a new portfolio for you")
-
     return port
+
 
 def new_port():
     """ Creates new portfolio as a dict of dicts from user input """
@@ -75,15 +85,14 @@ def new_port():
     write_csv(port)
     return port
 
+
 def enter_coins():
 
     listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', '{symbol: HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX'] 
 
-
     print("\nEnter each cryptocurrency (symbol) in your portfolio\nfollowed by their amounts. Press Enter when done.\n") 
     
     port_input = {}
-
     while True:
         symbol = input("Crypto symbol: ").upper()
         if symbol == "":
@@ -100,7 +109,6 @@ def enter_coins():
         elif amount > 0:
             pass
         port_input[symbol] = {"symbol": symbol, "amount": amount}
-
     return port_input
 
 
@@ -116,9 +124,9 @@ def add_buy(port):
             port[coin]["amount"] = port[coin]["amount"] + tx[coin]["amount"]
         else:
             port[coin] = tx[coin]
-    
     write_csv(port)
     return port
+
 
 def add_sell(port):
     """ Adds a sell transaction """
@@ -132,9 +140,9 @@ def add_sell(port):
             port[coin]["amount"] = port[coin]["amount"] - tx[coin]["amount"]
         else:
             port[coin] = tx[coin]
-    
     write_csv(port)
     return port
+
 
 def write_csv(port):
     """ takes in {symbol: {symbol, value}} and saves to csv file"""
@@ -146,13 +154,16 @@ def write_csv(port):
         for crypto in port:
             writer.writerow(port[crypto])
 
+
 def title():
     figlet = Figlet()
     title = "CryptoFolio"
     figlet.setFont(font="big")
-    print(figlet.renderText(title))
+    name =  figlet.renderText(title)
+    return f'\n{name}'
 
-def api_newsfeed():
+
+def latest_news():
     url = "https://cryptopanic.com/api/v1/posts/"
     auth_token = "2589302fe33d4a0169b908f7c911a7d0166e75cf" 
     headers = {"auth_token": auth_token, "kind": "news"} 
@@ -165,23 +176,14 @@ def api_newsfeed():
     data = response.json()
     headlines = data["results"]
     
-    print("\nNEWS\n")
+    newsfeed = ""
     top = 0
     while top < 5:
         h = headlines[top]
-        print(h["title"])
-        print(h["url"])
-        print()
+        newsfeed = newsfeed + '\n' + (f'{h["title"]}\n') + f'{h["url"]}' + '\n'
         top += 1
-    return data
+    return newsfeed
 
-def api_cmc_listings():
-    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
-    headers = {"Accept": "application/json","X-CMC_PRO_API_KEY": "d00168e2-fdfd-4186-8b69-5c2de5b26b12"}
-
-    response = requests.get(url, headers=headers)
-    j = response.json()
-    j = str(j)
 
 def api_coin_gecko():
     url = "https://api.blocknative.com/gasprices/blockprices"
@@ -207,16 +209,10 @@ def api_blocknative():
         file.write(j)
 
 
-def update(port):
-    port_sym = (list(port.keys()))
-    data = api_cmc(port_sym)
-    quote = sort_cmc(data, port)
-    return(quote)
-
 def api_cmc(port_sym):
     """Connects to CoinMarketCap API and requests current quotes"""
-    port_str = ",".join(port_sym)
 
+    port_str = ",".join(port_sym)
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
     parameters = {"symbol": port_str}
     headers = {
@@ -230,9 +226,9 @@ def api_cmc(port_sym):
         data = json.loads(response.text)
     except (ConnectionError, Timeout, TooManyRedirects) as e:
         print(e)
-    
     # print(json.dumps(data, sort_keys=True, indent=4))
     return data
+
 
 def sort_cmc(dump, port):
     crypto = list(port.keys())
@@ -251,6 +247,7 @@ def sort_cmc(dump, port):
         port[coin]["value"] = float(value)
     return port
     
+
 def api_eth_gas():
 
     url = "https://owlracle.info/eth/gas"
@@ -281,11 +278,8 @@ def display(port):
                 "7 Day Change": change7,
                 "Amount": amount, 
                 "Value": value, 
-
             })
-
     print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
-
 
 
 if __name__ == "__main__":
