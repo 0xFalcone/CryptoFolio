@@ -19,10 +19,10 @@ def main():
     else:
         portfolio = load_port()
 
-    # if command() == "buy":
-    #     portfolio = add_buy(portfolio)
-    # elif command() == "sell":
-    #     portfolio = add_sell(portfolio)
+    if command() == "buy":
+        portfolio = add_buy(portfolio)
+    elif command() == "sell":
+        portfolio = add_sell(portfolio)
     # elif command() == "news":
     #     print(latest_news())
 
@@ -70,14 +70,19 @@ def load_port():
 def new_port():
     """ Creates new portfolio as a dict of dicts from user input """
 
+    print("Welcome to CryptoFolio! Let's set up your portfolio")
+    port = enter_coins()
+    write_csv(port)
+    return port
+
+def enter_coins():
+
     listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', '{symbol: HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX'] 
 
 
-    print("\nWelcome to CryptoFolio! Let's set up a new portfolio for you")
     print("\nEnter each cryptocurrency (symbol) in your portfolio\nfollowed by their amounts. Press Enter when done.\n") 
     
-    new_port = {}
-    # new_port = {'ETH': {'symbol': 'ETH', 'amount': 2.0}, 'ALGO': {'symbol': 'ALGO', 'amount': 99.0}}
+    port_input = {}
 
     while True:
         symbol = input("Crypto symbol: ").upper()
@@ -94,11 +99,42 @@ def new_port():
             break
         elif amount > 0:
             pass
-        new_port[symbol] = {"symbol": symbol, "amount": amount}
+        port_input[symbol] = {"symbol": symbol, "amount": amount}
 
-    write_csv(new_port)
-    return new_port
+    return port_input
 
+
+def add_buy(port):
+    """ Adds a buy transaction """
+
+    print("\nLet's add a Buy transaction")
+    coins_held = list(port.keys())
+    tx = enter_coins()
+
+    for coin in tx:
+        if coin in coins_held:
+            port[coin]["amount"] = port[coin]["amount"] + tx[coin]["amount"]
+        else:
+            port[coin] = tx[coin]
+    
+    write_csv(port)
+    return port
+
+def add_sell(port):
+    """ Adds a sell transaction """
+
+    print("\nLet's add a Sell transaction")
+    coins_held = list(port.keys())
+    tx = enter_coins()
+
+    for coin in tx:
+        if coin in coins_held:
+            port[coin]["amount"] = port[coin]["amount"] - tx[coin]["amount"]
+        else:
+            port[coin] = tx[coin]
+    
+    write_csv(port)
+    return port
 
 def write_csv(port):
     """ takes in {symbol: {symbol, value}} and saves to csv file"""
