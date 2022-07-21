@@ -24,9 +24,14 @@ def main():
     elif command() == "sell":
         portfolio = add_sell(portfolio)
 
-    print(title())
+    # industry = crypto_industry()
     portfolio = update(portfolio)
-    display(portfolio)
+    total = total_value(portfolio)
+    # gas = current_gas_fee()
+    
+    print(title())
+    display(portfolio, total)
+    # display(industry, portfolio, total, gas)
 
     if command() == "news":
         print(latest_news())
@@ -80,7 +85,7 @@ def load_port():
 def new_port():
     """ Creates new portfolio as a dict of dicts from user input """
 
-    print("Welcome to CryptoFolio! Let's set up your portfolio")
+    print("Welcome to CryptoFolio! Let's set up your portfolio...")
     port = enter_coins()
     write_csv(port)
     return port
@@ -115,7 +120,7 @@ def enter_coins():
 def add_buy(port):
     """ Adds a buy transaction """
 
-    print("\nLet's add a Buy transaction")
+    print("\nLet's add a Buy transaction...")
     coins_held = list(port.keys())
     tx = enter_coins()
 
@@ -131,7 +136,7 @@ def add_buy(port):
 def add_sell(port):
     """ Adds a sell transaction """
 
-    print("\nLet's add a Sell transaction")
+    print("\nLet's add a Sell transaction...")
     coins_held = list(port.keys())
     tx = enter_coins()
 
@@ -260,7 +265,7 @@ def api_eth_gas():
     print(f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
 
 
-def display(port):
+def display(port, total):
     crypto = list(port.keys())
     coin_display = []
     for coin in crypto:
@@ -281,6 +286,14 @@ def display(port):
             })
     print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
 
+    total_display = [["Total Portfolio Value", f'${total:,.2f}']]
+    print(tabulate(total_display, tablefmt="grid", numalign="right"))
+
+def total_value(port):
+    total = 0
+    for coin in port:
+        total = total + port[coin]["value"]
+    return total
 
 if __name__ == "__main__":
     main()
