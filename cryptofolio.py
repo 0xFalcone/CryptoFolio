@@ -1,15 +1,11 @@
 import argparse
-import webbrowser
 from requests import Session
-import bs4
 import requests
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
+from bs4 import BeautifulSoup
 import json
 from pyfiglet import Figlet
 import csv
 from tabulate import tabulate
-from pycoingecko import CoinGeckoAPI
-cg = CoinGeckoAPI()
 
 
 def main():
@@ -24,17 +20,23 @@ def main():
     elif command() == "sell":
         portfolio = add_sell(portfolio)
 
-    # industry = crypto_industry()
+    # global_marketcap()
+    # fear_greed()
+	# cost_basis()
+	# sentiment()
+	# relative_strength()
     portfolio = update(portfolio)
     total = total_value(portfolio)
-    # gas = current_gas_fee()
+    gas = current_gas_fee()
     
     print(title())
-    display(portfolio, total)
-    # display(industry, portfolio, total, gas)
+    display(portfolio, total, gas)
 
     if command() == "news":
-        print(latest_news())
+        latest_news()
+		# print(latest_news())
+		# open_in_browser()
+		# story_count()
 
 
 def update(port):
@@ -69,7 +71,7 @@ def new_user():
 
 
 def load_port():
-    """ reads saved portfolio.csv or sets up new one and creates dict object"""
+    """ reads saved portfolio.csv and creates dict object"""
 
     port = {}
     try:
@@ -78,14 +80,16 @@ def load_port():
             for row in reader:
                 port[row["symbol"]] = {"symbol": row["symbol"], "amount": float(row["amount"])}
     except FileNotFoundError:
-        print("Welcome to CryptoFolio! Let's set up a new portfolio for you")
+        print("No existing portfolio found. Let's set up a new portfolio for you")
     return port
 
 
 def new_port():
     """ Creates new portfolio as a dict of dicts from user input """
 
-    print("Welcome to CryptoFolio! Let's set up your portfolio...")
+
+    print(title())
+    print("\nWelcome to CryptoFolio! Let's set up your portfolio...")
     port = enter_coins()
     write_csv(port)
     return port
@@ -93,9 +97,9 @@ def new_port():
 
 def enter_coins():
 
-    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', '{symbol: HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX'] 
+    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', 'HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX'] 
 
-    print("\nEnter each cryptocurrency (symbol) in your portfolio\nfollowed by their amounts. Press Enter when done.\n") 
+    print("\nEnter each cryptocurrency followed by their amounts. Press Enter when done.\n") 
     
     port_input = {}
     while True:
@@ -105,10 +109,13 @@ def enter_coins():
         elif symbol in listings:
             pass
         else:
-            print("Invalid listing")
+            print("Symbol not found. Please enter a valid token symbol.")
             continue
 
-        amount = float(input(f"{symbol} amount: "))
+        try:
+            amount = float(input(f"{symbol} amount: "))
+        except ValueError:
+            continue
         if amount == "":
             break
         elif amount > 0:
@@ -150,7 +157,7 @@ def add_sell(port):
 
 
 def write_csv(port):
-    """ takes in {symbol: {symbol, value}} and saves to csv file"""
+    """ takes in dict as {symbol: {symbol, amount}} and saves to csv file"""
 
     with open("portfolio.csv", "w", newline='') as file:
         fieldnames = ["symbol", "amount"]
@@ -167,51 +174,26 @@ def title():
     name =  figlet.renderText(title)
     return f'\n{name}'
 
-
 def latest_news():
-    url = "https://cryptopanic.com/api/v1/posts/"
-    auth_token = "2589302fe33d4a0169b908f7c911a7d0166e75cf" 
-    headers = {"auth_token": auth_token, "kind": "news"} 
 
-    response = requests.get(url, headers)
-    try:
-        response.raise_for_status()
-    except Exception as exc:
-        print("There was a problem: %s" % (exc))
-    data = response.json()
-    headlines = data["results"]
-    
-    newsfeed = ""
-    top = 0
-    while top < 5:
-        h = headlines[top]
-        newsfeed = newsfeed + '\n' + (f'{h["title"]}\n') + f'{h["url"]}' + '\n'
-        top += 1
-    return newsfeed
+	response = requests.get("https://cryptonetdaily.com/source/decrypt.co")
+	soup = BeautifulSoup(response.text, "html.parser")
 
-
-def api_coin_gecko():
-    url = "https://api.blocknative.com/gasprices/blockprices"
-    api_key = "3c93fef6-db22-41a5-bca6-4f68897c84b9"
-    headers = {"Authorization": "3c93fef6-db22-41a5-bca6-4f68897c84b9"}
-
-    response = requests.get(url, headers=headers)
-    j = response.json()
-    j = str(j)
-    with open("response_json.txt", "w") as file:
-        file.write(j)
-
-
-def api_blocknative():
-    url = "https://api.blocknative.com/gasprices/blockprices"
-    api_key = "3c93fef6-db22-41a5-bca6-4f68897c84b9"
-    headers = {"Authorization": "3c93fef6-db22-41a5-bca6-4f68897c84b9"}
-
-    response = requests.get(url, headers=headers)
-    j = response.json()
-    j = str(j)
-    with open("response_json.txt", "w") as file:
-        file.write(j)
+	top_stories = 5 
+	for story in range(1, top_stories + 1):
+		print()
+		headline = soup.find_all("h4", id = f"card-headline-text-{story}")
+		for h in headline:
+			title = h.text 
+			print(title.upper())
+		brief = soup.find_all("p", id = f"card-headline-lead-{story}")
+		for b in brief:
+			preview = b.text
+			print(preview.strip())
+		url = soup.find_all("a", id = f"card-headline-link-{story}")
+		for u in url:
+			href = u["href"]
+			print(href)
 
 
 def api_cmc(port_sym):
@@ -229,7 +211,7 @@ def api_cmc(port_sym):
     try:
         response = session.get(url, params=parameters)
         data = json.loads(response.text)
-    except (ConnectionError, Timeout, TooManyRedirects) as e:
+    except (ConnectionError) as e:
         print(e)
     # print(json.dumps(data, sort_keys=True, indent=4))
     return data
@@ -253,7 +235,7 @@ def sort_cmc(dump, port):
     return port
     
 
-def api_eth_gas():
+def current_gas_fee():
 
     url = "https://owlracle.info/eth/gas"
     api_key = "0c775e4a69e241589043a0d40a7ec2bc"
@@ -262,10 +244,11 @@ def api_eth_gas():
     r = requests.get(url)
     data = json.loads(r.text)
     standard = (data["speeds"][1])
-    print(f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
+    text_display = (f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
+    return text_display
 
 
-def display(port, total):
+def display(port, total, gas):
     crypto = list(port.keys())
     coin_display = []
     for coin in crypto:
@@ -284,10 +267,16 @@ def display(port, total):
                 "Amount": amount, 
                 "Value": value, 
             })
+
+    total_display = f'${total:,.2f}'
+    # total_display = [["Total Portfolio Value", f'${total:,.2f}']]
+    coin_display.append({"Coin": "TOTAL PORTFOLIO", "Value": total_display})
     print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
 
-    total_display = [["Total Portfolio Value", f'${total:,.2f}']]
-    print(tabulate(total_display, tablefmt="grid", numalign="right"))
+    # print(tabulate(total_display, tablefmt="grid", numalign="right"))
+    
+    gas_display = [[gas]]
+    print(tabulate(gas_display, tablefmt="grid")) 
 
 def total_value(port):
     total = 0

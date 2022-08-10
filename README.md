@@ -1,17 +1,16 @@
 # **CryptoFolio**
 
-A personal cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient financial overview        
+>A personal cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient financial overview   
+
+
 
 ## Features
-***
 * Check latest token prices and statistics 
 * Log buy and sell transactions
 * Get current ethereum gas fee estimations
-* Read the latest industry news 
-
+* Read the latest industry news
 
 ## Usage
-***
 To update and view portfolio values, navigate to the program's directory and type the following in the terminal:
 
 ```python
