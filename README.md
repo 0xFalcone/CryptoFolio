@@ -1,27 +1,40 @@
 # **CryptoFolio**
 
->A personal cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient financial overview   
+>A cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient personal financial overview
 
-
+## Video Demo: <https://www.youtube.com/@0xLogic>
 
 ## Features
-* Check latest token prices and statistics 
-* Log buy and sell transactions
+
+* Track all of your cryptocurrencies in one place
+* View total portfolio net worth at a glance
+* Get up-to-the-minute token prices and statistics from CoinGecko.com
+* See last 24 hour and Weekly gain/loss percentages
+* Log new buy and sell transactions
 * Get current ethereum gas fee estimations
-* Read the latest industry news
+* Saved as .csv file for easy importing into Excel/Sheets
 
 ## Usage
-To update and view portfolio values, navigate to the program's directory and type the following in the terminal:
+
+
+To run CryptoFolio, navigate to the program's directory and type the following in the terminal:
 
 ```python
-$ python cryptofolio.py
+python cryptofolio.py
 ```
-To get the latest crypto industry news, run using the '-n' flag. Ctrl + Left Click on a story's URL to view the full article in your browser
+
+Upon first running the program, CryptoFolio will check if there is an existing saved portfolio. If not, the user will be prompted to enter their current holdings or start with a blank slate
+
+Whenever you would like to get current prices, statistics, and total portfolio value simply run the program and information will be pulled from various sources and an updated report will be printed to the terminal
+
+When you need to enter a new buy transaction, simply run the program with the -b flag. You will be prompted to enter the coins purchased and their amounts. Press Enter when done entering all transactions to complete entry
+
 ```python
-$ python cryptofolio.py -n
+python cryptofolio.py -b
 ```
-    
-Run the program with either the '-b' or '-s' flags to enter a new buy/sell transaction
+
+To enter a new sell transaction, use the -s flag. Follow the same procedure as entering buy transactions
+
 ```python
-$ python cryptofolio.py -b
-$ python cryptofolio.py -s
+python cryptofolio.py -s
+```

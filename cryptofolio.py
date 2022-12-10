@@ -1,11 +1,10 @@
 import argparse
-from requests import Session
 import requests
-from bs4 import BeautifulSoup
 import json
 from pyfiglet import Figlet
 import csv
 from tabulate import tabulate
+from requests import Session
 
 
 def main():
@@ -20,49 +19,35 @@ def main():
     elif command() == "sell":
         portfolio = add_sell(portfolio)
 
-    # global_marketcap()
-    # fear_greed()
-	# cost_basis()
-	# sentiment()
-	# relative_strength()
     portfolio = update(portfolio)
     total = total_value(portfolio)
     gas = current_gas_fee()
-    
+
     print(title())
     display(portfolio, total, gas)
-
-    if command() == "news":
-        latest_news()
-		# print(latest_news())
-		# open_in_browser()
-		# story_count()
 
 
 def update(port):
     port_sym = (list(port.keys()))
     data = api_cmc(port_sym)
     quote = sort_cmc(data, port)
-    return(quote)
+    return quote
 
 
 def command():
     parser = argparse.ArgumentParser(description="Track your crypto portfolio and industry news")
     parser.add_argument("-b", help="Enter a Buy transaction", action="store_true")
     parser.add_argument("-s", help="Enter a Sell transaction", action="store_true")
-    parser.add_argument("-n", help="Check the news", action= "store_true")
-    args = parser.parse_args()              
+    args = parser.parse_args()
 
     if args.b:
         return "buy"
     elif args.s:
         return "sell"
-    elif args.n:
-        return "news"
 
 
 def new_user():
-    """ Checks for a saved portfolio.csv file """
+    """Check for a saved portfolio.csv file."""
     try:
         with open("portfolio.csv", "r", newline='') as file:
             reader = csv.DictReader(file)
@@ -71,8 +56,7 @@ def new_user():
 
 
 def load_port():
-    """ reads saved portfolio.csv and creates dict object"""
-
+    """Read saved portfolio.csv and creates dict object."""
     port = {}
     try:
         with open("portfolio.csv", "r", newline='') as file:
@@ -87,7 +71,6 @@ def load_port():
 def new_port():
     """ Creates new portfolio as a dict of dicts from user input """
 
-
     print(title())
     print("\nWelcome to CryptoFolio! Let's set up your portfolio...")
     port = enter_coins()
@@ -97,10 +80,10 @@ def new_port():
 
 def enter_coins():
 
-    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', 'HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX'] 
+    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', 'HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX']
 
-    print("\nEnter each cryptocurrency followed by their amounts. Press Enter when done.\n") 
-    
+    print("\nEnter each cryptocurrency followed by their amounts. Press Enter when done.\n")
+
     port_input = {}
     while True:
         symbol = input("Crypto symbol: ").upper()
@@ -174,27 +157,6 @@ def title():
     name =  figlet.renderText(title)
     return f'\n{name}'
 
-def latest_news():
-
-	response = requests.get("https://cryptonetdaily.com/source/decrypt.co")
-	soup = BeautifulSoup(response.text, "html.parser")
-
-	top_stories = 5 
-	for story in range(1, top_stories + 1):
-		print()
-		headline = soup.find_all("h4", id = f"card-headline-text-{story}")
-		for h in headline:
-			title = h.text 
-			print(title.upper())
-		brief = soup.find_all("p", id = f"card-headline-lead-{story}")
-		for b in brief:
-			preview = b.text
-			print(preview.strip())
-		url = soup.find_all("a", id = f"card-headline-link-{story}")
-		for u in url:
-			href = u["href"]
-			print(href)
-
 
 def api_cmc(port_sym):
     """Connects to CoinMarketCap API and requests current quotes"""
@@ -213,7 +175,6 @@ def api_cmc(port_sym):
         data = json.loads(response.text)
     except (ConnectionError) as e:
         print(e)
-    # print(json.dumps(data, sort_keys=True, indent=4))
     return data
 
 
@@ -226,14 +187,14 @@ def sort_cmc(dump, port):
         port[coin]["price"] = price
         change24 = dump["data"][coin]["quote"]["USD"]["percent_change_24h"]
         port[coin]["change24"] = change24
-        change7 = dump["data"][coin]["quote"]["USD"]["percent_change_7d"] 
+        change7 = dump["data"][coin]["quote"]["USD"]["percent_change_7d"]
         port[coin]["change7"] = change7
         amount = port[coin]["amount"]
         port[coin]["amount"] = amount
         value = float(price) * float(amount)
         port[coin]["value"] = float(value)
     return port
-    
+
 
 def current_gas_fee():
 
@@ -261,11 +222,11 @@ def display(port, total, gas):
         coin_display.append(
             {
                 "Coin": name,
-                "Price": price, 
-                "24hr Change": change24, 
+                "Price": price,
+                "24hr Change": change24,
                 "7 Day Change": change7,
-                "Amount": amount, 
-                "Value": value, 
+                "Amount": amount,
+                "Value": value,
             })
 
     total_display = f'${total:,.2f}'
@@ -273,16 +234,16 @@ def display(port, total, gas):
     coin_display.append({"Coin": "TOTAL PORTFOLIO", "Value": total_display})
     print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
 
-    # print(tabulate(total_display, tablefmt="grid", numalign="right"))
-    
     gas_display = [[gas]]
-    print(tabulate(gas_display, tablefmt="grid")) 
+    print(tabulate(gas_display, tablefmt="grid"))
+
 
 def total_value(port):
     total = 0
     for coin in port:
         total = total + port[coin]["value"]
     return total
+
 
 if __name__ == "__main__":
     main()
