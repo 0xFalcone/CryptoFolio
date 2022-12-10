@@ -1,29 +1,37 @@
 import argparse
 import requests
 import json
-from pyfiglet import Figlet
 import csv
+from pyfiglet import Figlet
 from tabulate import tabulate
 from requests import Session
 
 
 def main():
 
+    # Check to either create new portfolio or load an existing one
     if new_user():
         portfolio = new_port()
     else:
         portfolio = load_port()
 
+    # Check if a buy or sell transaction is being entered
     if command() == "buy":
         portfolio = add_buy(portfolio)
     elif command() == "sell":
         portfolio = add_sell(portfolio)
 
+    # Update portfolio with current values
     portfolio = update(portfolio)
     total = total_value(portfolio)
+
+    # Update Ethereum network gas fees
     gas = current_gas_fee()
 
+    # Display CryptoFolio title ascii graphic
     print(title())
+
+    # Display final report in table
     display(portfolio, total, gas)
 
 
@@ -80,7 +88,17 @@ def new_port():
 
 def enter_coins():
 
-    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL', 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI', 'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO', 'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR', 'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', 'HNT', 'QNT', 'AAVE', 'BSV', 'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC', 'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO', 'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC', 'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO', 'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR', 'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX']
+    listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL',
+                'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI',
+                'LTC', 'FTT', 'BNB', 'LINK', 'CRO', 'XLM', 'NEAR', 'ATOM', 'XMR', 'ALGO',
+                'ETC', 'BCH', 'ICP', 'VET', 'FLOW', 'MANA', 'XTZ', 'SAND', 'APE', 'HBAR',
+                'FIL', 'TUSD', 'BNB', 'THETA', 'EGLD', 'AXS', 'HNT', 'QNT', 'AAVE', 'BSV',
+                'USDP', 'EOS', 'KCS', 'MKR', 'ZEC', 'BTT', 'TRX', 'USDN', 'MIOTA', 'XEC',
+                'OKB', 'USDD', 'RUNE', 'BNB', 'HT', 'GRT', 'CHZ', 'KLAY', 'FTM', 'NEO',
+                'PAXG', 'BAT', 'LRC', 'WAVES', 'GMT', 'BNB', 'STX', 'ZIL', 'CRV', 'USTC',
+                'DASH', 'ENJ', 'FEI', 'CAKE', 'BNB', 'KSM', 'AR', 'MINA', 'KAVA', 'CELO',
+                'AMP', 'COMP', 'NEXO', 'CVX', 'XEM', 'GALA', 'HOT', '1INCH', 'XDC', 'DCR',
+                'GT', 'GNO', 'XYM', 'QTUM', 'KDA', 'SNX', 'IOTX']
 
     print("\nEnter each cryptocurrency followed by their amounts. Press Enter when done.\n")
 

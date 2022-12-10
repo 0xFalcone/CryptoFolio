@@ -25,4 +25,3 @@ def test_new_user():
 
 def test_title():
   assert type(title()) == type("")
-

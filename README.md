@@ -1,7 +1,5 @@
 # **CryptoFolio**
 
-![CryptoFolio screenshot](https://www.dropbox.com/s/u5xnd0cbk7bugf2/CF%20Report%20-%20noGas.png?dl=0)
-
 >A cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient personal financial overview
 
 ## Video Demo: <>
