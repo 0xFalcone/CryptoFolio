@@ -1,14 +1,16 @@
 # **CryptoFolio**
 
+![CryptoFolio screenshot](https://www.dropbox.com/s/u5xnd0cbk7bugf2/CF%20Report%20-%20noGas.png?dl=0)
+
 >A cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient personal financial overview
 
-## Video Demo: <https://www.youtube.com/@0xLogic>
+## Video Demo: <>
 
 ## Features
 
 * Track all of your cryptocurrencies in one place
 * View total portfolio net worth at a glance
-* Get up-to-the-minute token prices and statistics from CoinGecko.com
+* Get up-to-the-minute token prices and statistics from CoinMarketCap.com
 * See last 24 hour and Weekly gain/loss percentages
 * Log new buy and sell transactions
 * Get current ethereum gas fee estimations

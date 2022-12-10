@@ -35,7 +35,7 @@ def update(port):
 
 
 def command():
-    parser = argparse.ArgumentParser(description="Track your crypto portfolio and industry news")
+    parser = argparse.ArgumentParser(description="Track your crypto portfolio")
     parser.add_argument("-b", help="Enter a Buy transaction", action="store_true")
     parser.add_argument("-s", help="Enter a Sell transaction", action="store_true")
     args = parser.parse_args()
@@ -204,9 +204,12 @@ def current_gas_fee():
 
     r = requests.get(url)
     data = json.loads(r.text)
-    standard = (data["speeds"][1])
-    text_display = (f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
-    return text_display
+    try:
+        standard = (data["speeds"][1])
+        text_display = (f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
+        return text_display
+    except Exception:
+        return "Unable to retrieve Ethereum Gas estimate at this time. Please try again later"
 
 
 def display(port, total, gas):
@@ -230,9 +233,8 @@ def display(port, total, gas):
             })
 
     total_display = f'${total:,.2f}'
-    # total_display = [["Total Portfolio Value", f'${total:,.2f}']]
     coin_display.append({"Coin": "TOTAL PORTFOLIO", "Value": total_display})
-    print(tabulate(coin_display, headers="keys", tablefmt="grid", numalign="decimal"))
+    print(tabulate(coin_display, headers="keys", tablefmt="grid", floatfmt=">10.2f", numalign="decimal"))
 
     gas_display = [[gas]]
     print(tabulate(gas_display, tablefmt="grid"))
