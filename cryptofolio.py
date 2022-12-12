@@ -9,7 +9,7 @@ from requests import Session
 
 def main():
 
-    # Check to either create new portfolio or load an existing one
+    # Check for new or existing user to create or load portfolio
     if new_user():
         portfolio = new_port()
     else:
@@ -35,14 +35,10 @@ def main():
     display(portfolio, total, gas)
 
 
-def update(port):
-    port_sym = (list(port.keys()))
-    data = api_cmc(port_sym)
-    quote = sort_cmc(data, port)
-    return quote
-
 
 def command():
+    # Read and process command line arguments for buy/sell transactions
+
     parser = argparse.ArgumentParser(description="Track your crypto portfolio")
     parser.add_argument("-b", help="Enter a Buy transaction", action="store_true")
     parser.add_argument("-s", help="Enter a Sell transaction", action="store_true")
@@ -55,7 +51,8 @@ def command():
 
 
 def new_user():
-    """Check for a saved portfolio.csv file."""
+    # Check for an existing portfolio
+
     try:
         with open("portfolio.csv", "r", newline='') as file:
             reader = csv.DictReader(file)
@@ -64,20 +61,22 @@ def new_user():
 
 
 def load_port():
-    """Read saved portfolio.csv and creates dict object."""
+    # Read csv file from disk and format as a dictionary
+
     port = {}
     try:
         with open("portfolio.csv", "r", newline='') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                port[row["symbol"]] = {"symbol": row["symbol"], "amount": float(row["amount"])}
+                port[row["symbol"]] = {"symbol": row["symbol"],\
+                    "amount": float(row["amount"])}
     except FileNotFoundError:
         print("No existing portfolio found. Let's set up a new portfolio for you")
     return port
 
 
 def new_port():
-    """ Creates new portfolio as a dict of dicts from user input """
+    # Create a new portfolio from user input
 
     print(title())
     print("\nWelcome to CryptoFolio! Let's set up your portfolio...")
@@ -87,6 +86,7 @@ def new_port():
 
 
 def enter_coins():
+    # Prompt and check for correct coin symbol input
 
     listings = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'BUSD', 'BNB', 'XRP', 'ADA', 'SOL',
                 'DOGE', 'DAI', 'DOT', 'TRX', 'SHIB', 'LEO', 'AVAX', 'WBTC', 'MATIC', 'UNI',
@@ -126,7 +126,7 @@ def enter_coins():
 
 
 def add_buy(port):
-    """ Adds a buy transaction """
+    # Add new buy transaction to portfolio
 
     print("\nLet's add a Buy transaction...")
     coins_held = list(port.keys())
@@ -142,7 +142,7 @@ def add_buy(port):
 
 
 def add_sell(port):
-    """ Adds a sell transaction """
+    # Add new sell transaction to portfolio
 
     print("\nLet's add a Sell transaction...")
     coins_held = list(port.keys())
@@ -158,7 +158,7 @@ def add_sell(port):
 
 
 def write_csv(port):
-    """ takes in dict as {symbol: {symbol, amount}} and saves to csv file"""
+    # Portfolio in dict format {symbol: {symbol, amount}} is saved to csv file
 
     with open("portfolio.csv", "w", newline='') as file:
         fieldnames = ["symbol", "amount"]
@@ -169,15 +169,26 @@ def write_csv(port):
 
 
 def title():
+    # Create ascii of program name
+
     figlet = Figlet()
     title = "CryptoFolio"
     figlet.setFont(font="big")
     name =  figlet.renderText(title)
-    return f'\n{name}'
+    return f'\n\n{name}'
+
+
+def update(port):
+    # Update and format coins in portfolio
+
+    port_sym = (list(port.keys()))
+    data = api_cmc(port_sym)
+    quote = sort_cmc(data, port)
+    return quote
 
 
 def api_cmc(port_sym):
-    """Connects to CoinMarketCap API and requests current quotes"""
+    # Connect to CoinMarketCap API and request current quotes
 
     port_str = ",".join(port_sym)
     url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
@@ -197,6 +208,8 @@ def api_cmc(port_sym):
 
 
 def sort_cmc(dump, port):
+    # Format API json data received from CoinMarketCap.com
+
     crypto = list(port.keys())
     for coin in crypto:
         name = dump["data"][coin]["name"]
@@ -215,6 +228,7 @@ def sort_cmc(dump, port):
 
 
 def current_gas_fee():
+    # Connect to Owlracle API and request current Ethereum gas rate
 
     url = "https://owlracle.info/eth/gas"
     api_key = "0c775e4a69e241589043a0d40a7ec2bc"
@@ -224,13 +238,17 @@ def current_gas_fee():
     data = json.loads(r.text)
     try:
         standard = (data["speeds"][1])
-        text_display = (f'Ethereum Standard Gas Fee: ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
+        text_display = (f'Ethereum Standard Gas Fee: \
+            ${standard["estimatedFee"]:.2f} | Gwei: {standard["gasPrice"]:.2f}')
         return text_display
     except Exception:
-        return "Unable to retrieve Ethereum Gas estimate at this time. Please try again later"
+        return "Unable to retrieve Ethereum Gas estimate at this time.\
+            Please try again later"
 
 
 def display(port, total, gas):
+    # Format updated portfolio values in a table for display
+
     crypto = list(port.keys())
     coin_display = []
     for coin in crypto:
@@ -250,15 +268,21 @@ def display(port, total, gas):
                 "Value": value,
             })
 
+    # Display coins
     total_display = f'${total:,.2f}'
     coin_display.append({"Coin": "TOTAL PORTFOLIO", "Value": total_display})
-    print(tabulate(coin_display, headers="keys", tablefmt="grid", floatfmt=">10.2f", numalign="decimal"))
+    print(tabulate(coin_display, headers="keys", tablefmt="grid", \
+        floatfmt=">10.2f", numalign="decimal"))
 
+    # Display gas fees
     gas_display = [[gas]]
     print(tabulate(gas_display, tablefmt="grid"))
+    print("\n")
 
 
 def total_value(port):
+    # Calculate total dollar value of all coins
+
     total = 0
     for coin in port:
         total = total + port[coin]["value"]
