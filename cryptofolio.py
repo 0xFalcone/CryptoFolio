@@ -9,31 +9,28 @@ from requests import Session
 
 def main():
 
-    # Check for new or existing user to create or load portfolio
+    # Create new user portfolio or load existing one
     if new_user():
         portfolio = new_port()
     else:
         portfolio = load_port()
 
-    # Check if a buy or sell transaction is being entered
+    # Enter buy or sell transaction from command line
     if command() == "buy":
         portfolio = add_buy(portfolio)
     elif command() == "sell":
         portfolio = add_sell(portfolio)
 
-    # Update portfolio with current values
+    # Get current prices and statistics
     portfolio = update(portfolio)
     total = total_value(portfolio)
 
-    # Update Ethereum network gas fees
+    # Get Ethereum network gas fee estimates
     gas = current_gas_fee()
 
-    # Display CryptoFolio title ascii graphic
+    # View full portfolio report
     print(title())
-
-    # Display final report in table
     display(portfolio, total, gas)
-
 
 
 def command():
@@ -158,7 +155,7 @@ def add_sell(port):
 
 
 def write_csv(port):
-    # Portfolio in dict format {symbol: {symbol, amount}} is saved to csv file
+    # Export to Excel/Google Sheets as a CSV file for processing
 
     with open("portfolio.csv", "w", newline='') as file:
         fieldnames = ["symbol", "amount"]
@@ -169,7 +166,7 @@ def write_csv(port):
 
 
 def title():
-    # Create ascii of program name
+    # Create ascii graphic of program name
 
     figlet = Figlet()
     title = "CryptoFolio"
@@ -179,7 +176,7 @@ def title():
 
 
 def update(port):
-    # Update and format coins in portfolio
+    # Update and sort coins in portfolio
 
     port_sym = (list(port.keys()))
     data = api_cmc(port_sym)
@@ -228,7 +225,7 @@ def sort_cmc(dump, port):
 
 
 def current_gas_fee():
-    # Connect to Owlracle API and request current Ethereum gas rate
+    # Get current Ethereum network gas fee estimates
 
     url = "https://owlracle.info/eth/gas"
     api_key = "0c775e4a69e241589043a0d40a7ec2bc"
@@ -277,7 +274,7 @@ def display(port, total, gas):
     # Display gas fees
     gas_display = [[gas]]
     print(tabulate(gas_display, tablefmt="grid"))
-    print("\n")
+    print("\n\n")
 
 
 def total_value(port):

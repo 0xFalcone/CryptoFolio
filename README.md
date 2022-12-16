@@ -2,7 +2,7 @@
 
 >A cryptocurrency portfolio tracking application that pulls information from multiple public APIs into one quick and convenient personal financial overview
 
-## Video Demo: <>
+## Video Demo: <https://www.youtube.com/watch?v=3_TnTaiHCCM>
 
 ## Features
 
